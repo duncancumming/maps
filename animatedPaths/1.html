@@ -44,14 +44,12 @@
 			marker=new google.maps.Marker({map:map,icon:"http://maps.google.com/mapfiles/ms/micons/blue.png"});
 
 			for (i = 0; i < pathCoords.length; i++) {
-				//console.log(i);console.log(coords[i]);
 				setTimeout(function (coords)
 				{
 					var latlng = new google.maps.LatLng(coords.lat, coords.lng);
 					route.getPath().push(latlng);
-					//route.getPath().push(coords);
 					moveMarker(map, marker, latlng);
-				}, 250 * i, pathCoords[i]);
+				}, 200 * i, pathCoords[i]);
 			}
 		}
 

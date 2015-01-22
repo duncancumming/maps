@@ -13,11 +13,9 @@
 	</style>
 	<script src="https://maps.googleapis.com/maps/api/js?v=3.exp&amp;libraries=geometry"></script>
 	<script>
-		var start = {lat: 51.5087531, lng: -0.1281153};
-		
 		function initialize() {
 			var map = new google.maps.Map(document.getElementById("map"), {
-			  center: start,
+			  center: {lat: 51.5087531, lng: -0.1281153},
 			  zoom: 7,
 			  mapTypeId: google.maps.MapTypeId.ROADMAP
 			});
@@ -43,16 +41,6 @@
 				map:map
 			});
 			
-			var route2 = new google.maps.Polyline({
-				path: pathCoords,
-				geodesic : true,
-				strokeColor: '#0000FF',
-				strokeOpacity: 1.0,
-				strokeWeight: 2,
-				editable: false,
-				map:map
-			});
-			
 			marker=new google.maps.Marker({map:map, icon:"http://maps.google.com/mapfiles/ms/micons/blue.png"});
 
 			for (i = 0; i < pathCoords.length; i++) {				
@@ -65,9 +53,6 @@
 		
 		function getDirections(map) {
 			var directionsService = new google.maps.DirectionsService();
-
-			var start = {lat: 51.5087531, lng: -0.1281153};
-			var end = {lat: 48.8583694, lng: 2.2944796};
 			
 			var start = new google.maps.LatLng(51.5087531, -0.1281153);
 			var end = new google.maps.LatLng(48.8583694, 2.2944796);
