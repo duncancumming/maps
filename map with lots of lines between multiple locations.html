@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Calculating average distances betwen lots of points</title>
+	<meta name="viewport" content="initial-scale=1.0, user-scalable=no">
+	<meta charset="utf-8">
+	<style>
+		html, body {
+			height: 100%;
+			margin: 0px;
+			padding: 0px
+		}
+		#map {
+			height: 400px; width: 800px;
+			margin: 0px;
+			padding: 0px
+		}
+	</style>
+	<script src="https://maps.googleapis.com/maps/api/js?v=3&libraries=geometry"></script>
+	<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.0/jquery.min.js"></script>
+	<script>
+		var map;
+		var bounds;
+		var sum;
+		var officeCoordinates = [];
+		var distances = [];
+
+		var officeLocations = [
+			"The Shard, 32 London Bridge Street, London, SE1 9SG",
+			"30 St Mary Axe, London, EC3A 8EP"
+		];
+		
+		var homeLocations = [
+			"Heathrow Airport, Greater London TW6",
+			"Crystal Palace Park, Thicket Road, London, Crystal Palace SE19 2GA",
+			"Alexandra Palace, Alexandra Palace Way, London N22 7AY"
+		];
+			
+		function initialize() {
+			/*
+			Plot a marker on each of the above addresses
+				- use the GeocodeRequest 
+			Create an array of other addresses
+			Plot a different-coloured marker on each of those
+			Draw a polyline between each address and the two locations
+			Find out the distance of all those polylines. Calculate the averages
+			
+			Have a way of toggling between the two locations
+			
+			Add the distance as a label to each polyline 
+			
+			Repeat all the above using the Directions API to get driving route distances (but perhaps no map)
+			
+			
+			2nd version: draw our office markers, add a circle of variable (draggable?) radius around them, indicate markers inside/outside that circle
+			
+			
+			Another iteration: have all the addresses in a JSON file. Use the Geocoder API to convert them all to coordinates.
+			Once that's complete, load them onto the map, do the rest.
+			*/
+			
+			var centre = new google.maps.LatLng(51.510717, -0.085859);
+			var i;
+			
+			map = new google.maps.Map(document.getElementById("map"), {
+			  center: centre,
+			  zoom: 13,
+			  mapTypeId: google.maps.MapTypeId.ROADMAP
+			});
+			
+			bounds = new google.maps.LatLngBounds();
+			bounds.extend(centre);
+			
+			for (i = 0; i < officeLocations.length; i++) {
+				plotOfficeMarker(officeLocations[i], i);
+			}
+		}
+		
+		
+		function plotOfficeMarker(address, row) {
+			var geocoder = new google.maps.Geocoder();
+
+			geocoder.geocode({'address': address}, function(results, status) {
+				if (status == google.maps.GeocoderStatus.OK) {
+					var marker = new google.maps.Marker({
+						map: map,
+						position: results[0].geometry.location,
+						icon: "http://maps.google.com/mapfiles/ms/micons/blue.png"
+					});
+					var i, id;
+					
+					bounds.extend(results[0].geometry.location);
+					
+					map.fitBounds(bounds);
+					
+					officeCoordinates.push(results[0].geometry.location);
+										
+					$('#distances').append('<strong>' + address + '</strong><br>');
+					
+					distances.push([]);
+					
+					sum = 0;
+					
+					var averageDiv = $('<div id="#average' + row + '"></div>');
+					$('#distances').append(averageDiv);
+						
+					for (i = 0; i < homeLocations.length; i++) {
+						id = $('<div></div>');
+
+						$('#distances').append(id);
+
+						plotHomeMarker(homeLocations[i], results[0].geometry.location, id, row, averageDiv, i, i+1 === homeLocations.length);
+					}			
+				}
+			});
+		}
+		
+		function plotHomeMarker(address, officeLocation, id, officeNum, averageDiv, homeNum, isLastHome) {
+			var geocoder = new google.maps.Geocoder();
+
+			geocoder.geocode({'address': address}, function(results, status) {
+				if (status == google.maps.GeocoderStatus.OK) {
+					var marker = new google.maps.Marker({
+						map: map,
+						position: results[0].geometry.location,
+						icon: "http://maps.google.com/mapfiles/ms/micons/red.png"
+					});
+					
+					bounds.extend(results[0].geometry.location);
+					
+					map.fitBounds(bounds);
+					
+					var line = new google.maps.Polyline({
+						path: [
+							officeLocation,
+							results[0].geometry.location
+						],
+						strokeColor: '#000000',
+						strokeOpacity: 1.0,
+						strokeWeight: 2,
+						editable: false,
+						map:map
+					});
+					
+					// what's the distance of the line?
+					var distance = google.maps.geometry.spherical.computeDistanceBetween(officeLocation, results[0].geometry.location);
+					
+					// convert metres to miles:
+					distance = Math.round(distance / 1000 * 0.6214 *10)/10;	
+										
+					distances[officeNum].push(distance);
+					
+					$(id).html(address + ': ' + distance + '<br>');
+
+					if (isLastHome) {
+					
+						var sum = distances[officeNum].reduce(function(a, b) {
+							return a + b;
+						});
+						
+						var average = sum / (homeNum + 1);
+						
+						average = Math.round(average *100)/100;
+												
+						$(averageDiv).html("Average = " + average);
+					}
+				}
+			});
+		}
+		
+		google.maps.event.addDomListener(window, 'load', initialize);
+	</script>
+</head>
+<body>
+	<div id="map"></div>
+	<div id="distances"></div>
+</body>
+</html>
