@@ -23,17 +23,10 @@
 			autoRefresh(map);
 		}
 
-		function moveMarker1(map, marker, latlng) {
+		function moveMarker(map, marker, latlng) {
 			marker.setPosition(latlng);
-			map.panTo(latlng);
 		}
 		
-		
-		function moveMarker2(map, marker, latlng) {
-			marker.setPosition(latlng);
-			map.panTo(latlng);
-		}
-
 		function autoRefresh(map) {
 			var i, route1, route2, marker1, marker2;
 			
@@ -62,20 +55,21 @@
 			marker2 =new google.maps.Marker({map:map,icon:"http://maps.google.com/mapfiles/ms/micons/red.png"});			
 
 			for (i = 0; i < pathCoords1.length; i++) {
-				setTimeout(function (coords1, coords2)
+				setTimeout(function (coords)
 				{
-					var latlng1 = new google.maps.LatLng(coords1.lat, coords1.lng);
-					// this next line gives an error
-					route1.getPath().push(latlng1);
-					moveMarker1(map, marker1, latlng1);
-					
-					var latlng2 = new google.maps.LatLng(coords2.lat, coords2.lng);
-					// this next line gives an error
-					route2.getPath().push(latlng2);
-					moveMarker2(map, marker2, latlng2);
-					
-					
-				}, 200 * i, pathCoords1[i], pathCoords2[i]);
+					var latlng = new google.maps.LatLng(coords.lat, coords.lng);
+					route1.getPath().push(latlng);
+					moveMarker(map, marker1, latlng);
+				}, 200 * i, pathCoords1[i]);
+			}
+				
+			for (i = 0; i < pathCoords2.length; i++) {
+				setTimeout(function (coords)
+				{
+					var latlng = new google.maps.LatLng(coords.lat, coords.lng);
+					route2.getPath().push(latlng);
+					moveMarker(map, marker2, latlng);
+				}, 250 * i, pathCoords2[i]);
 			}
 		}
 
