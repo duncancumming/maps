@@ -12,72 +12,75 @@
 			padding: 0px
 		}
 	</style>
-	<script src="https://maps.googleapis.com/maps/api/js?v=3.exp&amp;callback=initialize"></script>
+	<script src="https://maps.googleapis.com/maps/api/js?v=3.exp&amp;libraries=geometry"></script>
 	<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.0/jquery.min.js"></script>
 	<script>
 		var allCoords = [];
 		var map, route, marker;
 		
-function getCoords() {
-	$.ajax({
-		url: 'coordinates4.csv',
-		dataType: 'text',
-		success: function(data) {
-			var lines = data.split(/[\r\n]+/);
-									
-			lines.forEach(function(line){
-				allCoords.push(line.split(','));
+		function getCoords() {
+			$.ajax({
+				url: 'coordinates4.csv',
+				dataType: 'text',
+				success: function(data) {
+					var lines = data.split(/[\r\n]+/);
+											
+					lines.forEach(function(line){
+						allCoords.push(line.split(','));
+					});
+
+					var bounds = new google.maps.LatLngBounds();
+
+					allCoords.forEach(function(coords){
+						bounds.extend(new google.maps.LatLng(coords[0], coords[1]));
+					});
+					
+					map.fitBounds(bounds);
+											
+					drawLine();
+				}
 			});
-
-			var bounds = new google.maps.LatLngBounds();
-
-			allCoords.forEach(function(coords){
-				bounds.extend(new google.maps.LatLng(coords[0], coords[1]));
+		}
+				
+		function drawLine() {
+			route = new google.maps.Polyline({
+				path: [],
+				geodesic : true,
+				strokeColor: '#FF0000',
+				strokeOpacity: 0.7,
+				strokeWeight: 2,
+				editable: false,
+				map:map
 			});
 			
-			map.fitBounds(bounds);
-									
-			drawLine();
+			marker = new google.maps.Marker({
+				map: map,
+				icon: "http://maps.google.com/mapfiles/ms/micons/blue.png"
+			});
+			
+			for (var i = 0; i < allCoords.length; i++) {
+				window.setTimeout(updatePath, 50 * i, allCoords[i]);
+			}
 		}
-	});
-}
-		
-function drawLine() {
-	route = new google.maps.Polyline({
-		path: [],
-		geodesic : true,
-		strokeColor: '#FF0000',
-		strokeOpacity: 0.7,
-		strokeWeight: 2,
-		editable: false,
-		map:map
-	});
-	
-	marker = new google.maps.Marker({
-		map: map,
-		icon: "http://maps.google.com/mapfiles/ms/micons/blue.png"
-	});
-	
-	for (var i = 0; i < allCoords.length; i++) {
-		window.setTimeout(updatePath(coords), 50 * i, allCoords[i]);
-	}
-}
 
-function updatePath(coords) {
-	var latLng = new google.maps.LatLng(coords[0], coords[1]);
-	route.getPath().push(latLng);
-	marker.setPosition(latLng);
-}
+		function updatePath(coords) {
+			console.log(coords);
+			var latLng = new google.maps.LatLng(coords[0], coords[1]);
+			route.getPath().push(latLng);
+			marker.setPosition(latLng);
+		}
+				
+		function initialize() {
+			map = new google.maps.Map(document.getElementById("map"), {
+			  center: {lat: 51.4788639, lng: -0.0062897},
+			  zoom: 3,
+			  mapTypeId: google.maps.MapTypeId.ROADMAP
+			});
+			
+			getCoords();
+		}
 		
-function initialize() {	
-	map = new google.maps.Map(document.getElementById("map"), {
-	  center: {lat: 51.4788639, lng: -0.0062897},
-	  zoom: 3,
-	  mapTypeId: google.maps.MapTypeId.ROADMAP
-	});
-	
-	getCoords();
-}
+		google.maps.event.addDomListener(window, 'load', initialize);
 	</script>
 </head>
 <body>
