@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+<script>
+function getCoords() {
+	// generate a bunch of slightly random coordinates
+	var max = 70000;	// ultimately let's try for 70,000
+	var start = {lat: 0, lng: 0};
+	
+	coords = start.lat + ',' + start.lng;
+	
+	var lat = start.lat;
+	var lng = start.lng;
+	var randomLat,randomLng, newLat, newLng;
+	var plusOrMinusLat = 1, plusOrMinusLng = 1;
+	
+	// set upper / lower limits for each; if we reach that limit, swap the plus/minus we're using
+	var maxLat = 85;
+	//var maxLng = 180;
+	var minLat = -85;
+	//var minLng = -180;
+		
+	for (var i = 0; i < max; i++) {
+		randomLat = Math.random();
+		randomLng = Math.random();
+		
+		newLat = lat + (randomLat * plusOrMinusLat);
+		newLng = lng + randomLng;
+		
+		if (newLat > maxLat) {
+			plusOrMinusLat = -1;
+			continue;
+		} else if (newLat < minLat) {
+			plusOrMinusLat = 1;
+			continue;
+		}
+		
+		/*if (newLng > maxLng) {
+			plusOrMinusLng = -1;
+			continue;
+		} else if (newLng < minLng) {
+			plusOrMinusLng = 1;
+			continue;
+		}*/
+		
+		//x = Math.random() * 100;
+		//console.log(random, plusOrMinus);
+		lat = newLat;
+		lng = newLng;
+		//console.log(lat, lng);
+		coords += '\n' + lat + ',' + lng;
+	}
+	
+	//console.log(coords);
+	
+	document.getElementById('coords').value = coords;
+}
+
+//getCoords();
+</script>
+</head>
+<body>
+	<textarea id="coords"></textarea>
+	
+	<input type="submit" onclick="javascript:getCoords()">
+</body>
+</html>
